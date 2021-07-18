@@ -1,6 +1,6 @@
 export default {
-    wechatRedirect: ' /wechat/redirect?url=https%3A%2F%2Fm.abc.com%2F%23%2Findex&scope=snsapi_userinfo',
-    wechatConfig: '/wechat/jssdk',
-    getUserInfo: '/wechat/getUserInfo',
-    payWallet: '/wechat/pay/paywallet'
+    wechatRedirect: '/api/wechat/redirect?url=http%3A%2F%2Fm.imooc.com%2F%23%2Findex&scope=snsapi_userinfo',
+    wechatConfig: '/api/wechat/jssdk',
+    getUserInfo: '/api/wechat/getUserInfo',
+    payWallet: '/api/wechat/pay/paywallet'
 }

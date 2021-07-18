@@ -10,11 +10,10 @@
 </template>
 
 <script>
+
 export default {
     name:'index',
-    mounted(){
-        window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wxa9045987c27c5cc0&redirect_uri=https%3A%2F%2Fm.abc.com%2F%23%2Findex&response_type=code&scope=snsapi_userinfo&state=123#wechat_redirect'
-    }
+
 }
 </script>
 
