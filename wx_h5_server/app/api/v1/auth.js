@@ -3,11 +3,12 @@ const axios = require('axios')
 const router= new Router({
     prefix:'/api/wechat'
 })
-const config = require('../../../configs/config.js')
+const config = require('../../../config/config.js')
 const Auth = require('../../../utils/token')
 const Http = require('../../../utils/http')
 let redirectUrl
-
+let access_token
+let openid
 
 // 用户授权重定向
 router.get('/redirect',(ctx)=>{
@@ -27,12 +28,23 @@ router.get('/getOpenId', async (ctx)=>{
         ctx.body = Http.handleFail('code为空')
     }else{
             let res = await Auth.getAccessToken(ctx, code)
+            Auth.setCookies(ctx, 'openid', res.openid)
+            openid = res.openid
+            access_token = res.access_token
+
             ctx.body = {
                 openid: res.openid,
                 access_token: res.access_token
             }
             ctx.redirect(redirectUrl)
+            // ctx.redirect('http://m.imooc.com/api/wechat/getUserInfo')
     }
+})
+
+router.get('/getUserInfo', async (ctx,next)=>{
+    console.log('进入UserInfo')
+    let res = await Auth.getUserinfo(openid, access_token)
+    ctx.body = res.data
 })
 
 module.exports = router 

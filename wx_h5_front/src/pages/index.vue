@@ -10,10 +10,24 @@
 </template>
 
 <script>
-
+import API from '../api'
 export default {
     name:'index',
-
+    data(){
+        return {
+            Userinfo:null
+        }
+    },
+    methods:{
+        async getUserInfo(){
+            let res = await this.axios.get(API.getUserInfo)
+            this.Userinfo = res.data
+            console.log('Userinfo',this.Userinfo)
+        }
+    },
+    mounted(){
+        this.getUserInfo()
+    }
 }
 </script>
 
