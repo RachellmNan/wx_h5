@@ -1,6 +1,7 @@
 <template>
     <div class="index">
         <img src="../assets/img/header.png" class="header"/>
+        <div class="user" v-if="Userinfo ">{{Userinfo.nickname}}</div>
         <div class="btn-group">
             <button class="btn">分享</button>
             <button class="btn btn-primary">充值</button> 
@@ -22,11 +23,15 @@ export default {
         async getUserInfo(){
             let res = await this.axios.get(API.getUserInfo)
             this.Userinfo = res.data
-            console.log('Userinfo',this.Userinfo)
+        },
+        async getJsSdk(){
+            await this.axios.get(`/api/wechat/jssdk?url=${location.href}`)
         }
     },
     mounted(){
-        this.getUserInfo()
+        if(this.$cookie.get('openid')){
+            this.getUserInfo()
+        }
     }
 }
 </script>
@@ -47,5 +52,9 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+.user{
+    text-align: center;
+    font-size: .4rem;
 }
 </style>

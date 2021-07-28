@@ -1,7 +1,5 @@
-import wx from 'weixin-js-sdk'
-
 export default {
-    initShareInfo(){
+    initShareInfo(wx){
         let shareInfo = {
             title:'分享和支付课程',
             desc: '欢迎学习分享和支付课程',
@@ -12,7 +10,8 @@ export default {
         wx.onMenuShareAppMessage(shareInfo)
         wx.onMenuShareQQ(shareInfo)
         wx.onMenuShareQZone(shareInfo)
-        wx.updateAppMessageShareData(shareInfo)
-        wx.updateTimelineShareData(shareInfo)
+        // wx.updateAppMessageShareData(shareInfo)
+        // wx.updateTimelineShareData(shareInfo)
+        // wx.chooseWXPay(shareInfo)
     }
 }

@@ -1,11 +1,15 @@
 const Router = require('koa-router')
 const axios = require('axios')
+const createHash = require('create-hash')
 const router= new Router({
     prefix:'/api/wechat'
 })
+const mongoose = require('mongoose')
+const UserModel = mongoose.model('User')
 const config = require('../../../config/config.js')
 const Auth = require('../../../utils/token')
 const Http = require('../../../utils/http')
+const { ParameterException } = require('../../../utils/HttpException.js')
 let redirectUrl
 let access_token
 let openid
@@ -32,19 +36,71 @@ router.get('/getOpenId', async (ctx)=>{
             openid = res.openid
             access_token = res.access_token
 
+            let result = await UserModel.findOne({
+                openid
+            })
+            if(!result){
+                result = await Auth.getUserinfo(openid, access_token)
+                await UserModel.create({
+                    openid: result.openid,
+                    city: result.city,
+                    country: result.country,
+                    nickname: result.nickname,
+                    province: result.province,
+                    sex: result.sex,
+                    privilege: result.privilege
+                })
+            }
+            
             ctx.body = {
                 openid: res.openid,
                 access_token: res.access_token
             }
             ctx.redirect(redirectUrl)
-            // ctx.redirect('http://m.imooc.com/api/wechat/getUserInfo')
     }
 })
 
 router.get('/getUserInfo', async (ctx,next)=>{
     console.log('进入UserInfo')
     let res = await Auth.getUserinfo(openid, access_token)
-    ctx.body = res.data
+    ctx.body = res
 })
 
-module.exports = router 
+router.get('/jssdk', async (ctx)=>{
+    let {url} = ctx.query
+    let token = await Auth.getNormalToken()
+    let ticket = await Auth.getJsTicket(token)
+    ctx.ticket = ticket 
+    const params = {
+        noncestr: Http.createNonceStr(),
+        jsapi_ticket: ticket,
+        timestamp: Http.createTimeStamp(),
+        url
+    }
+    let waitingSignature = Http.raw(params)
+    let sign
+    try {
+        sign = createHash('sha1').update(waitingSignature).digest('hex')
+    } catch (error) {
+        throw new ParameterException()
+    }
+    console.log('sign: ',sign)
+    ctx.body = {
+        appId: config.wx.appId, 
+        timestamp: params.timestamp, 
+        nonceStr: params.noncestr,
+        signature: sign,
+        jsApiList:[
+            'updateAppMessageShareData',
+            'updateTimelineShareData',
+            'onMenuShareTimeline',
+            'onMenuShareAppMessage',
+            'onMenuShareQQ',
+            'onMenuShareQZone',
+            'chooseWXPay'
+        ]
+    }
+
+})
+
+module.exports = router  

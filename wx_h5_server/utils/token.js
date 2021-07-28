@@ -2,6 +2,8 @@ const axios = require('axios')
 // 过期时间为 2h
 const expire_time = 1000 * 60 * 60 * 2
 const config = require('../config/config')
+const { handleResponse } = require('./http')
+const { ParameterException } = require('./HttpException')
 
 
 async function getAccessToken(ctx, code){
@@ -9,19 +11,25 @@ async function getAccessToken(ctx, code){
     let res = await axios.get(token_url)
     ctx.openid = res.data.openid
     ctx.access_token = res.data.access_token
-    if(res.status == 200){
-        return {
-            access_token: res.data.access_token,
-            openid: res.data.openid
-        }
+    await handleResponse(res)
+    return {
+        access_token: res.data.access_token,
+        openid: res.data.openid
     }
 }
 
-async function getToken(appid, appsecret){
-    return new Promise(async(resolve,reject)=>{
-        let res = axios.get(`https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET`)
+async function getNormalToken(){
+    let res = await axios.get(`https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=${config.wx.appId}&secret=${config.wx.appSecret}`)
+    await handleResponse(res)
+    return res.data.access_token
         
-    })
+}
+
+async function getJsTicket(ACCESS_TOKEN){
+    let url = `https://api.weixin.qq.com/cgi-bin/ticket/getticket?access_token=${ACCESS_TOKEN}&type=jsapi`
+    let res = await axios.get(url)
+    await handleResponse(res)
+    return res.data.ticket
 }
 
 function setCookies(ctx, key, value ,domain = 'm.imooc.com', path = '/', maxAge = expire_time, httpOnly = false){
@@ -35,12 +43,15 @@ function setCookies(ctx, key, value ,domain = 'm.imooc.com', path = '/', maxAge 
 
 async function getUserinfo(openId, accessToken){
     let url = `https://api.weixin.qq.com/sns/userinfo?access_token=${accessToken}&openid=${openId}&lang=zh_CN`
-    return await axios.get(url)
+    let res = await axios.get(url)
+    await handleResponse(res)
+    return res.data
 }
 
 module.exports = {
     getAccessToken,
     setCookies,
-    getToken,
-    getUserinfo
+    getNormalToken,
+    getUserinfo,
+    getJsTicket
 }

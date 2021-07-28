@@ -13,8 +13,11 @@
   "dependencies": {
     "@koa/cors": "^3.1.0",
     "axios": "^0.21.1",
+    "create-hash": "^1.2.0",
     "koa": "^2.13.1",
     "koa-body": "^4.2.0",
-    "koa-router": "^10.0.0"
+    "koa-router": "^10.0.0",
+    "mongoose": "^5.13.2",
+    "require-directory": "^2.1.1"
   }
 }
